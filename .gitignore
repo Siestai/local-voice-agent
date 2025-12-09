@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env.local
+.env.production
+
+# Logs
+logs/
+*.log
+
+# Voice clones (audio files may be large/private)
+voice_clones/*.wav
+voice_clones/*.mp3
+voice_clones/*.flac
+voice_clones/*.pt
+!voice_clones/.gitkeep
+
+# Backups
+backups/
+
+# Models cache
+.cache/
+*.gguf
+*.safetensors
+
+# Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-*
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Temporary files
+tmp/
+temp/
+*.tmp
