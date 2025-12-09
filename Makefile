@@ -32,7 +32,7 @@ install-neutts: ## Install NeuTTS Air from source
 	@if [ ! -d "/tmp/neutts-air" ]; then \
 		git clone https://github.com/neuphonic/neutts-air.git /tmp/neutts-air; \
 	fi
-	@cd /tmp/neutts-air && . ../livekit-voice-agent/venv/bin/activate && pip install -e .
+		@cd /tmp/neutts-air && . $(CURDIR)/venv/bin/activate && pip install -e .
 	@echo "$(GREEN)✓ NeuTTS Air installed$(RESET)"
 
 setup: ## Initialize project (create directories)
