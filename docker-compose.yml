@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: livekit-server
+    command: --config /etc/livekit.yaml
+    restart: unless-stopped
+    ports:
+      # WebSocket port for client connections
+      - "7880:7880"
+      # HTTP API port
+      - "7881:7881"
+      # WebRTC UDP ports (RTP/RTCP)
+      - "50000-50200:50000-50200/udp"
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro
+    networks:
+      - livekit-network
+    environment:
+      - LIVEKIT_CONFIG=/etc/livekit.yaml
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:7880"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  livekit-network:
+    driver: bridge
+

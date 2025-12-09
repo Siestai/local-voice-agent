@@ -1,0 +1,68 @@
+# LiveKit Server Configuration
+# For local development use only
+
+port: 7880
+bind_addresses:
+  - "0.0.0.0"
+
+# WebRTC configuration
+rtc:
+  # UDP ports for WebRTC media
+  port_range_start: 50000
+  port_range_end: 50200
+  # Use mDNS for local network discovery
+  use_external_ip: false
+  # Local IP configuration
+  node_ip: "127.0.0.1"
+
+# API keys for development
+# WARNING: Change these for production use!
+keys:
+  devkey: secret
+
+# Redis (optional, for multi-node setups)
+# Commented out for single-node local development
+# redis:
+#   address: redis:6379
+
+# Room settings
+room:
+  # Automatically create rooms when participants join
+  auto_create: true
+  # Enable empty room timeout (in seconds)
+  empty_timeout: 300
+  # Maximum number of participants per room
+  max_participants: 20
+
+# Logging
+logging:
+  level: info
+  # Possible values: debug, info, warn, error
+  sample: false
+
+# Enable development mode features
+# WARNING: Disable for production!
+dev_mode: true
+
+# TURN server configuration (for NAT traversal)
+# For local development, we don't need external TURN
+turn:
+  enabled: false
+  # Uncomment for production with TURN server:
+  # domain: turn.yourdomain.com
+  # tls_port: 5349
+  # udp_port: 3478
+
+# WebHook configuration (optional)
+# webhook:
+#   api_key: your-webhook-api-key
+#   urls:
+#     - http://your-webhook-endpoint.com
+
+# Region (for distributed deployments)
+# region: us-west-1
+
+# Node selector (for kubernetes deployments)
+# node_selector:
+#   zone: us-west-1a
+

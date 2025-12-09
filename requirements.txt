@@ -1,0 +1,47 @@
+# LiveKit Core
+livekit>=0.15.0
+livekit-api>=0.6.0
+livekit-agents>=0.9.0
+livekit-plugins-silero>=0.6.0
+
+# MLX Framework for Apple Silicon
+mlx>=0.20.0
+mlx-lm>=0.19.0
+
+# Whisper MLX for Speech-to-Text
+mlx-whisper>=0.4.0
+
+# NeuTTS Air for Text-to-Speech
+# Note: Install from source or pip when available
+# For now, we'll use a local implementation wrapper
+torch>=2.0.0
+torchaudio>=2.0.0
+soundfile>=0.12.0
+
+# Audio Processing
+numpy>=1.24.0
+scipy>=1.10.0
+librosa>=0.10.0
+pydub>=0.25.0
+
+# Phonemizer (required for NeuTTS)
+phonemizer>=3.2.0
+
+# Async and networking
+aiohttp>=3.9.0
+python-dotenv>=1.0.0
+websockets>=12.0
+
+# Utilities
+pyyaml>=6.0
+click>=8.1.0
+rich>=13.0.0  # For beautiful terminal output
+
+# Development tools
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+ruff>=0.1.0
+
+# Optional: For better logging
+loguru>=0.7.0
