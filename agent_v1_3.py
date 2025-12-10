@@ -150,7 +150,8 @@ async def entrypoint(ctx: JobContext):
 async def request_fnc(req: agents.JobRequest):
     """Accept all job requests"""
     logger.info(f"Received job request for room: {req.room.name}")
-    await req.accept(entrypoint)
+    # In v1.3+, accept() doesn't take arguments - the entrypoint is registered separately
+    await req.accept()
 
 
 def main():
