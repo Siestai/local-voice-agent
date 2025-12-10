@@ -72,7 +72,6 @@ class MLXLLM(llm.LLM):
         self,
         *,
         chat_ctx: llm.ChatContext,
-        fnc_ctx: Optional[llm.FunctionContext] = None,
         temperature: Optional[float] = None,
         n: int = 1,
     ) -> "MLXLLMStream":
@@ -105,7 +104,7 @@ class MLXLLMStream(llm.LLMStream):
         max_tokens: int,
         top_p: float,
     ):
-        super().__init__(chat_ctx=chat_ctx, fnc_ctx=None)
+        super().__init__(chat_ctx=chat_ctx)
         self._model = model
         self._tokenizer = tokenizer
         self._llm = llm
