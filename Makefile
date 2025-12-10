@@ -1,4 +1,4 @@
-.PHONY: help install setup clean run dev console test lint format livekit-start livekit-stop livekit-status livekit-logs livekit-restart
+.PHONY: help install setup clean run dev dev-v1 console test lint format livekit-start livekit-stop livekit-status livekit-logs livekit-restart check-version upgrade-agents downgrade-agents
 
 .DEFAULT_GOAL := help
 
@@ -82,13 +82,36 @@ run: ## Run agent in production mode
 	@echo "$(BLUE)Starting agent (production mode)...$(RESET)"
 	@. venv/bin/activate && python agent.py start
 
-dev: ## Run agent in development mode
+dev: ## Run agent in development mode (auto-detect version)
 	@echo "$(BLUE)Starting agent (development mode)...$(RESET)"
+	@. venv/bin/activate && \
+	AGENTS_VERSION=$$(python -c "import livekit.agents; print(livekit.agents.__version__)" 2>/dev/null || echo "unknown"); \
+	if [ "$$AGENTS_VERSION" = "unknown" ]; then \
+		echo "$(RED)✗ livekit-agents not installed$(RESET)"; \
+		exit 1; \
+	fi; \
+	MAJOR_VERSION=$$(echo $$AGENTS_VERSION | cut -d. -f1); \
+	if [ "$$MAJOR_VERSION" = "1" ]; then \
+		echo "$(YELLOW)Detected livekit-agents v$$AGENTS_VERSION (v1.x)$(RESET)"; \
+		echo "$(YELLOW)Using agent_v1_3.py for compatibility$(RESET)"; \
+		python agent_v1_3.py dev; \
+	else \
+		echo "$(YELLOW)Detected livekit-agents v$$AGENTS_VERSION$(RESET)"; \
+		python agent.py dev; \
+	fi
+
+dev-v1: ## Run agent with v1.3+ compatible code
+	@echo "$(BLUE)Starting agent (v1.3+ compatible)...$(RESET)"
+	@. venv/bin/activate && python agent_v1_3.py dev
+
+dev-legacy: ## Run agent with legacy v0.9 code
+	@echo "$(BLUE)Starting agent (legacy v0.9 code)...$(RESET)"
+	@echo "$(YELLOW)Note: This requires livekit-agents v0.9.x$(RESET)"
 	@. venv/bin/activate && python agent.py dev
 
 console: ## Run agent in console mode (terminal only)
 	@echo "$(BLUE)Starting agent (console mode)...$(RESET)"
-	@. venv/bin/activate && python agent.py console
+	@. venv/bin/activate && python agent_v1_3.py console
 
 test: ## Run tests
 	@echo "$(BLUE)Running tests...$(RESET)"
@@ -128,6 +151,56 @@ check-env: ## Check environment variables
 	if [ -z "$$LIVEKIT_API_SECRET" ]; then echo "$(RED)✗ LIVEKIT_API_SECRET not set$(RESET)"; exit 1; fi
 	@echo "$(GREEN)✓ Environment OK$(RESET)"
 
+check-version: ## Check livekit-agents version
+	@echo "$(BLUE)Package Versions$(RESET)"
+	@echo ""
+	@. venv/bin/activate && \
+	echo "livekit-agents:  $$(pip show livekit-agents 2>/dev/null | grep Version | cut -d' ' -f2 || echo 'not installed')" && \
+	echo "livekit:         $$(pip show livekit 2>/dev/null | grep Version | cut -d' ' -f2 || echo 'not installed')" && \
+	echo "livekit-api:     $$(pip show livekit-api 2>/dev/null | grep Version | cut -d' ' -f2 || echo 'not installed')" && \
+	echo "" && \
+	AGENTS_VERSION=$$(python -c "import livekit.agents; print(livekit.agents.__version__)" 2>/dev/null); \
+	if [ ! -z "$$AGENTS_VERSION" ]; then \
+		MAJOR_VERSION=$$(echo $$AGENTS_VERSION | cut -d. -f1); \
+		if [ "$$MAJOR_VERSION" = "1" ]; then \
+			echo "$(GREEN)✓ Using v1.x API - run 'make dev-v1' or 'make dev'$(RESET)"; \
+		else \
+			echo "$(YELLOW)⚠ Using v0.x API - run 'make dev-legacy'$(RESET)"; \
+		fi; \
+	else \
+		echo "$(RED)✗ livekit-agents not installed$(RESET)"; \
+	fi
+
+upgrade-agents: ## Upgrade to livekit-agents v1.x (latest)
+	@echo "$(BLUE)Upgrading to livekit-agents v1.x...$(RESET)"
+	@echo "$(YELLOW)This will upgrade to the latest version$(RESET)"
+	@read -p "Continue? [y/N] " -n 1 -r; \
+	echo; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		. venv/bin/activate && \
+		pip install --upgrade livekit-agents livekit livekit-api && \
+		echo "$(GREEN)✓ Upgraded to latest version$(RESET)" && \
+		echo "" && \
+		make check-version; \
+	else \
+		echo "Cancelled"; \
+	fi
+
+downgrade-agents: ## Downgrade to livekit-agents v0.9.x
+	@echo "$(BLUE)Downgrading to livekit-agents v0.9.x...$(RESET)"
+	@echo "$(YELLOW)This will downgrade to v0.9.0 for legacy code compatibility$(RESET)"
+	@read -p "Continue? [y/N] " -n 1 -r; \
+	echo; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		. venv/bin/activate && \
+		pip install livekit-agents==0.9.0 livekit==0.15.0 livekit-api==0.6.0 && \
+		echo "$(GREEN)✓ Downgraded to v0.9.0$(RESET)" && \
+		echo "" && \
+		make check-version; \
+	else \
+		echo "Cancelled"; \
+	fi
+
 logs: ## View logs
 	@if [ -f logs/agent.log ]; then \
 		tail -f logs/agent.log; \
@@ -147,10 +220,17 @@ info: ## Show system information
 	@echo "espeak:"
 	@if command -v espeak >/dev/null 2>&1; then echo "$(GREEN)✓ Installed$(RESET)"; else echo "$(RED)✗ Not installed$(RESET)"; fi
 	@echo ""
+	@echo "Docker:"
+	@if command -v docker >/dev/null 2>&1; then echo "$(GREEN)✓ Installed$(RESET)"; else echo "$(RED)✗ Not installed$(RESET)"; fi
+	@echo ""
 	@echo "LiveKit server:"
 	@if curl -s http://localhost:7880 >/dev/null 2>&1; then echo "$(GREEN)✓ Running$(RESET)"; else echo "$(YELLOW)⚠ Not running$(RESET)"; fi
+	@echo ""
+	@. venv/bin/activate && \
+	AGENTS_VERSION=$$(python -c "import livekit.agents; print(livekit.agents.__version__)" 2>/dev/null || echo "not installed"); \
+	echo "livekit-agents: $$AGENTS_VERSION"
 
-doctor: check-env info test-connection ## Run all checks
+doctor: check-env info check-version test-connection ## Run all checks
 
 backup: ## Backup configuration
 	@echo "$(BLUE)Backing up configuration...$(RESET)"
