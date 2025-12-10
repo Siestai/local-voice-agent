@@ -40,10 +40,6 @@ logging:
   # Possible values: debug, info, warn, error
   sample: false
 
-# Enable development mode features
-# WARNING: Disable for production!
-dev_mode: true
-
 # TURN server configuration (for NAT traversal)
 # For local development, we don't need external TURN
 turn:
