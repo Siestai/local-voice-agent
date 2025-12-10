@@ -14,8 +14,8 @@ from livekit.agents import (
     WorkerOptions,
     cli,
     llm,
-    pipeline,
 )
+from livekit.agents.pipeline import VoicePipelineAgent
 from livekit.plugins import silero
 
 from dotenv import load_dotenv
@@ -121,7 +121,7 @@ class VoiceAgent:
         logger.info("✓ TTS initialized")
 
         # Create voice pipeline agent
-        assistant = pipeline.VoicePipelineAgent(
+        assistant = VoicePipelineAgent(
             vad=vad_instance,
             stt=stt_instance,
             llm=llm_instance,
