@@ -4,7 +4,7 @@ services:
   livekit:
     image: livekit/livekit-server:latest
     container_name: livekit-server
-    command: --config /etc/livekit.yaml
+    command: ["--config", "/etc/livekit.yaml"]
     restart: unless-stopped
     ports:
       # WebSocket port for client connections
